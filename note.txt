@@ -113,3 +113,9 @@ MoSCoW
 
 Buku 37signals
 secara psikologis di-keep atau dibuang
+
+
+checklist sesuai yang ingin kita validasi
+checkpoint yang akan diverifikasi
+
+checklist usecase yang mungkin missing dari implementasi
