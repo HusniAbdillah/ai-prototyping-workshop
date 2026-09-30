@@ -113,7 +113,8 @@ export default function App() {
         "shopee_sales_report.csv",
         "tiktok_sales_report.csv",
         "internal_master_data.csv",
-        "shopee_inventory_report.csv"
+        "shopee_inventory_report.csv",
+        "tiktok_inventory_report.csv",
       ];
       const fetchedFiles: File[] = [];
       for (const name of filesToFetch) {

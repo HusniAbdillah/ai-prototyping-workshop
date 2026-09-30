@@ -54,3 +54,14 @@ Proses *AI Prototyping* ini membuktikan bagaimana kerangka berpikir *Top Product
   2. **Settings Abstraction:** Memindahkan konfigurasi *WhatsApp Routing Matrix* ke modal/pop-up khusus agar tidak memenuhi layar utama.
   3. **Mobile-First Layout:** Menggunakan layout yang sangat bersahabat di perangkat kecil, di mana tabel memiliki scroll-horizontal aman tanpa merusak lebar aplikasi, serta indikator *badge notification* di navigasi yang menarik perhatian secara intuitif.
   4. **Glassmorphism & Contrast:** Menambahkan efek translusen ala antarmuka sistem operasi modern (*Apple-like design*) untuk me-rekayasa visual agar lebih elegan, menenangkan, sekaligus memberikan urgensi warna merah murni *hanya* pada baris yang *Critical*.
+
+---
+
+## 8. Ingestion Completeness & Omnichannel Inventory Parity (The TikTok Inventory Fix)
+- **Jebakan Awal:** Hanya memuat 4 dari 5 file CSV pada tombol Demo Loader (`shopee_sales`, `tiktok_sales`, `internal_master`, `shopee_inventory`), sementara `tiktok_inventory_report.csv` tertinggal.
+- **The Reality (Learnings):** Karena file inventori TikTok tidak dimuat, pemetaan stok kanal TikTok pada memori RAM browser bernilai `undefined`, yang kemudian jatuh ke fallback `master.currentMarketplaceStock` (yang bernilai 0 jika data master tidak memiliki kolom stok kanal). Hal ini menyebabkan engine menghitung semua SKU TikTok sebagai stok 0 atau mendeteksi OOS darurat secara tidak akurat.
+- **The Pivot:** 
+  1. Memasukkan `tiktok_inventory_report.csv` ke dalam `filesToFetch` demo data loader di `src/App.tsx`.
+  2. Memvalidasi bahwa normalisasi `TIKTOK_INVENTORY` membaca alias kolom TikTok (`Seller SKU`, `Available Stock`) dengan benar.
+  3. Menambahkan integration test suite otomatis `all-demo-files.test.ts` untuk menjamin seluruh 5 file demo terproses tanpa berkas yang terlewat atau menghasilkan `skippedFiles`.
+

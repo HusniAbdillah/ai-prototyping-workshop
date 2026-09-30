@@ -26,6 +26,9 @@ Dokumen ini mendefinisikan kriteria penerimaan (*Acceptance Criteria*) dan prose
 3. **Verifikasi: Pengaturan Routing (WhatsApp) Tersimpan Permanen**
    - *Masalah Sebelumnya:* AM harus mengkonfigurasi nomor routing setiap *refresh*.
    - *Validasi Lolos:* Pembuatan *hook* `useLocalStorage` bekerja mulus pada `SettingsPanel`.
+4. **Verifikasi: Kelengkapan 5 File Demo Data & Paritas Inventori TikTok**
+   - *Masalah Sebelumnya:* `tiktok_inventory_report.csv` tidak dimuat saat klik "Load Demo Data" (hanya 4 file), menyebabkan stok TikTok fallback ke 0.
+   - *Validasi Lolos:* Seluruh 5 file (`shopee_sales`, `tiktok_sales`, `internal_master`, `shopee_inventory`, `tiktok_inventory`) dimuat lengkap, stok etalase TikTok terbaca akurat, dan OOS Risk TikTok dihitung menggunakan stok aktual. Diverifikasi dengan automated test `tests/ingestion/all-demo-files.test.ts`.
 
 ---
 
