@@ -23,8 +23,8 @@ Sesuai prinsip "Zero Boilerplate", kita tidak akan men-setup server/database unt
     WhatsAppButton.tsx   # Komponen generator URL wa.me
   /core                  # The Decision Engine (Murni Logic)
     csvNormalizer.ts     # Mapper Shopee/TikTok/Master -> Omnichannel Schema
-    marginEngine.ts      # Logika margin bleeding
-    runwayEngine.ts      # Logika stock & velocity
+    marginEngine.ts      # Logika margin bleeding & budget safe tracking
+    runwayEngine.ts      # Logika stock & time-windowed runrate per SKU
   /store                 # State Management
     useDataStore.ts      # Zustand store untuk menyimpan CSV yang ter-parse
   /types                 # TypeScript Definitions
@@ -35,7 +35,7 @@ Sesuai prinsip "Zero Boilerplate", kita tidak akan men-setup server/database unt
 
 ## 3. Data Interfaces (TypeScript)
 
-Berikut adalah struktur data internal (Omnichannel Schema) yang digunakan setelah CSV dinormalisasi.
+Berikut adalah struktur data internal (Omnichannel Schema) yang wajib digunakan. Struktur ini menampung variabel `promoBudgetCap` (untuk deteksi under COGS budget safe) dan data waktu order (untuk *time-windowed runrate*).
 
 ```typescript
 // /src/types/index.ts
@@ -44,6 +44,7 @@ export type Marketplace = 'SHOPEE' | 'TIKTOK';
 
 export interface RawSaleRecord {
   orderId: string;
+  orderTime: string;       // Dibutuhkan untuk Time-windowed Runrate (Velocity)
   marketplace: Marketplace;
   sku: string;
   dealPrice: number;       // Uang yang dibayar pembeli
@@ -54,17 +55,18 @@ export interface RawSaleRecord {
 
 export interface MasterCatalog {
   sku: string;
-  cogs: number;
+  cogs: number;            // Cost of Goods Sold
   globalBuffer: number;
+  promoBudgetCap: number;  // Budget maksimal untuk jual rugi/Promo
 }
 
 export interface AnomalyResult {
   sku: string;
   channel: Marketplace;
-  issueType: 'MARGIN_BLEED' | 'OOS_RISK';
-  severity: 'CRITICAL' | 'WARNING';
+  issueType: 'MARGIN_BLEED' | 'BUDGET_BREACH' | 'OOS_RISK';
+  severity: 'CRITICAL' | 'WARNING' | 'SAFE';
   actionableMessage: string;
-  whatsappPayloadUrl: string; // Pre-generated wa.me link
+  whatsappPayloadUrl?: string; // Pre-generated wa.me link (untuk CRITICAL/WARNING)
 }
 ```
 
@@ -72,4 +74,4 @@ export interface AnomalyResult {
 
 ## 4. Performance Consideration
 - Walaupun *client-side*, `PapaParse` mampu membaca 10.000 baris CSV dalam < 1 detik jika menggunakan *Web Workers*.
-- Hindari rendering 10.000 baris ke dalam `<table>` HTML sekaligus. Gunakan *Virtualization* (seperti `tanstack-virtual`) HANYA JIKA sistem menampilkan semua data. Namun, sesuai filosofi kita, UI **hanya akan merender baris anomali**, yang biasanya kurang dari 100 baris per eksekusi.
+- UI **hanya akan merender baris anomali (CRITICAL / WARNING)**, sehingga tidak memberatkan *memory browser*. Baris yang *BUDGET SAFE* atau *SAFE (Profitable)* akan di-filter (*hidden*), kecuali user sengaja melihatnya.

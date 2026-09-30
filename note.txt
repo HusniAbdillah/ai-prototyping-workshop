@@ -102,3 +102,8 @@ DESIGN.md
 tech
 tolong generate data penjualan dan data inventory yang biasa di-download dari marketplace, TikTok dan Shopee
 
+interview questionslinkedin
+
+what the interview questions
+bagaimana kita menghitung price di gojek pada saat rush our
+
