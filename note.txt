@@ -1,0 +1,104 @@
+spec
+output 
+
+kasih spec apa yang dibuat, di akhir dapat outputnya
+
+stok
+kirim PO di-reject
+
+data sangat penting sebelum prototype
+
+PM: kombinasi skill
+skill UX + tech + data person atau engineering sekalian
+
+How thinks works as an engineer adalah ngulik code, 
+
+
+QA
+SIRCLO Insight
+SIRCLO AI
+QA paling akhir dibutuhin
+UI Concistency, keamanan, testing manual gak usah, dilakukan oleh AI
+Specialist Domain
+
+Software Quality <- Engineers dengan speciality QA
+
+dulu ada 2 orang doang:
+UX researcher 
+Yohan Engineers
+
+Account Manager productivity tool
+
+Recap: 2 minggu
+Claim Report
+
+SIRCLO Insight
+
+B2B
+Automation
+Sebagian besar pekerjaan diganti AI
+Monthly business Report
+
+
+harga COGS
+dari og csv yang dicek per jam, download spreadsheet 
+
+Needs vs Wants
+
+Kenapa dia minta itu
+
+Live multi channel API
+auto stock rebalancing
+
+17 orang
+every minutes count
+
+Speed: response time 
+
+ada banyak 
+
+barang yang terjual di COGS
+makin banyak kehilangan
+
+keep the download center
+tarik dari api jadi real time
+
+jumlah produk yang terjual di bawah COGS
+out of stock
+
+Account Manager
+
+Every minutes count every loss money
+
+times, 
+
+
+Download -> Analisa -> Decision -> 
+Analisa lama, 
+
+Mengambil decision
+
+time
+
+Data skema: Stok, Buffer, Velocity, Harga, COGS
+
+Ngelakuin excel dll
+
+30 detik dapat insight-nya
+
+MVP
+
+Asking right questions bukan skill QA, Engineers, PM, HR
+
+Psikologi
+
+Hal di luar engineering, with the era of ai is the most important understand other thinks
+
+
+PRODUCT_SPEC.md
+
+DESIGN.md
+
+tech
+tolong generate data penjualan dan data inventory yang biasa di-download dari marketplace, TikTok dan Shopee
+
