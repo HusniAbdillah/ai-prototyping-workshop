@@ -34,6 +34,8 @@ export default function App() {
   const [totalCritical, setTotalCritical] = useState(0);
   const [totalWarning, setTotalWarning] = useState(0);
   const [totalRunningLoss, setTotalRunningLoss] = useState(0);
+  const [orphanSkusCount, setOrphanSkusCount] = useState(0);
+  const [dataRecency, setDataRecency] = useState<number | null>(null);
   const [recognizedRoles, setRecognizedRoles] = useState<string[]>([]);
   const [skippedFiles, setSkippedFiles] = useState<string[]>([]);
 
@@ -62,6 +64,8 @@ export default function App() {
         setTotalCritical(0);
         setTotalWarning(0);
         setTotalRunningLoss(0);
+        setOrphanSkusCount(0);
+        setDataRecency(null);
         setRecognizedRoles([]);
         setSkippedFiles([]);
         stop();
@@ -85,6 +89,13 @@ export default function App() {
         setTotalCritical(out.totalCritical);
         setTotalWarning(out.totalWarning);
         setTotalRunningLoss(out.totalRunningLoss);
+        setOrphanSkusCount(out.unmatchedSkus.length);
+
+        if (dataset.omnichannelSales.length > 0) {
+          setDataRecency(Math.max(...dataset.omnichannelSales.map(s => s.orderTimestamp)));
+        } else {
+          setDataRecency(null);
+        }
       } catch (err) {
         console.error("Gagal ingest data", err);
         alert("Gagal memproses CSV: " + (err instanceof Error ? err.message : String(err)));
@@ -133,6 +144,14 @@ export default function App() {
     },
     [],
   );
+
+  const handleUndoEscalate = useCallback((anomalyId: string) => {
+    setEscalationMap((prev) => {
+      const copy = { ...prev };
+      delete copy[anomalyId];
+      return copy;
+    });
+  }, []);
 
   const navigateToAnomaly = useCallback((id: string) => {
     setActiveTab("triage");
@@ -262,7 +281,7 @@ export default function App() {
 
             {/* KPI Section */}
             {files.length > 0 && (
-              <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white dark:bg-white/5 rounded-3xl p-6 border border-gray-100 dark:border-white/10 shadow-sm">
                   <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Critical Bleed</p>
                   <h2 className="text-4xl font-bold text-red-500 mt-2">{totalCritical}</h2>
@@ -272,10 +291,20 @@ export default function App() {
                   <h2 className="text-4xl font-bold text-yellow-500 mt-2">{totalWarning}</h2>
                 </div>
                 <div className="bg-white dark:bg-white/5 rounded-3xl p-6 border border-gray-100 dark:border-white/10 shadow-sm">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Orphan SKUs</p>
+                  <h2 className="text-4xl font-bold text-orange-500 mt-2">{orphanSkusCount}</h2>
+                </div>
+                <div className="bg-white dark:bg-white/5 rounded-3xl p-6 border border-gray-100 dark:border-white/10 shadow-sm">
                   <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Akumulasi Burn</p>
                   <h2 className="text-2xl font-bold text-black dark:text-white mt-2">Rp {totalRunningLoss.toLocaleString('id-ID')}</h2>
                 </div>
               </section>
+            )}
+
+            {dataRecency && (
+              <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-4">
+                Data Recency: {new Date(dataRecency).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}
+              </p>
             )}
           </div>
         )}
@@ -298,6 +327,7 @@ export default function App() {
                 anomalies={anomalies}
                 escalationMap={escalationMap}
                 onEscalate={handleEscalate}
+                onUndoEscalate={handleUndoEscalate}
               />
             </div>
           </div>

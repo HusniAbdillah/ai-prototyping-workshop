@@ -18,6 +18,7 @@ export interface TriageTableProps {
   anomalies: AnomalyResult[];
   escalationMap: EscalationMap;
   onEscalate: (anomaly: AnomalyResult, to: "PRICING" | "WAREHOUSE") => void;
+  onUndoEscalate: (anomalyId: string) => void;
   highlightedId?: string | null;
 }
 
@@ -61,8 +62,14 @@ function MetricCell({ anomaly }: { anomaly: AnomalyResult }) {
   }
 
   return (
-    <div className="space-y-0.5 text-xs text-muted-foreground">
-      <p>Rugi/unit: {formatRupiah(anomaly.lossPerUnit ?? 0)}</p>
+    <div className="space-y-1 text-xs text-muted-foreground">
+      <div className="bg-muted/50 p-2 rounded-md space-y-1">
+        <p className="flex justify-between"><span>Deal Price (Display):</span> <span>{formatRupiah((anomaly.dealPrice ?? 0))}</span></p>
+        <p className="flex justify-between"><span>Est. Admin Fee:</span> <span className="text-destructive">-{formatRupiah(anomaly.estimatedFee ?? 0)}</span></p>
+        <p className="flex justify-between border-t pt-1 font-medium"><span>Net Payout:</span> <span>{formatRupiah(anomaly.netPayout ?? 0)}</span></p>
+        <p className="flex justify-between"><span>COGS:</span> <span className="text-destructive">-{formatRupiah(anomaly.cogs ?? 0)}</span></p>
+      </div>
+      <p className="font-semibold text-destructive pt-1">Rugi/unit: -{formatRupiah(anomaly.lossPerUnit ?? 0)}</p>
       <p>Akumulasi: {formatRupiah(anomaly.cumulativeBurn ?? 0)}</p>
       {anomaly.budgetCap ? (
         <p>
@@ -83,6 +90,7 @@ export function TriageTable({
   anomalies,
   escalationMap,
   onEscalate,
+  onUndoEscalate,
   highlightedId,
 }: TriageTableProps) {
   const [filter, setFilter] = useState<Filter>("ALL");
@@ -187,9 +195,14 @@ export function TriageTable({
                   </td>
                   <td className="px-3 py-2 text-right">
                     {record ? (
-                      <span className="text-xs text-muted-foreground">
-                        Tindakan terkirim
-                      </span>
+                      <div className="flex flex-col items-end gap-2">
+                        <span className="text-xs text-muted-foreground">
+                          Tindakan terkirim ke {record.escalatedTo}
+                        </span>
+                        <Button variant="outline" size="sm" onClick={() => onUndoEscalate(a.id)}>
+                          Undo
+                        </Button>
+                      </div>
                     ) : (
                       <Button
                         size="sm"
