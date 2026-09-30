@@ -50,12 +50,15 @@ function escalationTarget(action: RecommendedAction): "PRICING" | "WAREHOUSE" {
 function MetricCell({ anomaly }: { anomaly: AnomalyResult }) {
   if (anomaly.issueType === "OOS_RISK") {
     return (
-      <div className="space-y-0.5 text-xs text-muted-foreground">
-        <p>Runway: {formatRunway(anomaly.runwayHours ?? 0)}</p>
-        <p>Velocity: {formatVelocity(anomaly.velocityPerHour ?? 0)}</p>
-        <p>Buffer: {anomaly.globalBuffer ?? 0} unit</p>
+      <div className="space-y-1 text-xs text-muted-foreground">
+        <div className="bg-muted/50 p-2 rounded-md space-y-1">
+          <p className="flex justify-between"><span>Sisa Stok Etalase:</span> <span>{anomaly.currentStock ?? 0} unit</span></p>
+          <p className="flex justify-between"><span>Kecepatan Terjual:</span> <span>{formatVelocity(anomaly.velocityPerHour ?? 0)}</span></p>
+          <p className="flex justify-between border-t pt-1 font-medium"><span>Runway (Sisa Waktu):</span> <span className="text-destructive">{formatRunway(anomaly.runwayHours ?? 0)}</span></p>
+        </div>
+        <p>Stok Gudang Pusat: {anomaly.globalBuffer ?? 0} unit</p>
         {anomaly.recommendedRebalance ? (
-          <p>Suntik: {anomaly.recommendedRebalance} unit</p>
+          <p className="font-semibold text-emerald-600 pt-1">Rekomendasi Suntik: +{anomaly.recommendedRebalance} unit</p>
         ) : null}
       </div>
     );
@@ -64,7 +67,9 @@ function MetricCell({ anomaly }: { anomaly: AnomalyResult }) {
   return (
     <div className="space-y-1 text-xs text-muted-foreground">
       <div className="bg-muted/50 p-2 rounded-md space-y-1">
-        <p className="flex justify-between"><span>Deal Price (Display):</span> <span>{formatRupiah((anomaly.dealPrice ?? 0))}</span></p>
+        <p className="flex justify-between"><span>Deal Price (Paid by Buyer):</span> <span>{formatRupiah(anomaly.dealPrice ?? 0)}</span></p>
+        <p className="flex justify-between"><span>Platform Subsidy:</span> <span className="text-emerald-600">+{formatRupiah(anomaly.platformSubsidy ?? 0)}</span></p>
+        <p className="flex justify-between"><span>Seller Voucher:</span> <span className="text-destructive">-{formatRupiah(anomaly.sellerVoucher ?? 0)}</span></p>
         <p className="flex justify-between"><span>Est. Admin Fee:</span> <span className="text-destructive">-{formatRupiah(anomaly.estimatedFee ?? 0)}</span></p>
         <p className="flex justify-between border-t pt-1 font-medium"><span>Net Payout:</span> <span>{formatRupiah(anomaly.netPayout ?? 0)}</span></p>
         <p className="flex justify-between"><span>COGS:</span> <span className="text-destructive">-{formatRupiah(anomaly.cogs ?? 0)}</span></p>
