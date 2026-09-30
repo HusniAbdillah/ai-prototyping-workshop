@@ -25,3 +25,6 @@ coverage
 
 # Command Code internals
 .commandcode/
+
+# TypeScript incremental build info
+*.tsbuildinfo
