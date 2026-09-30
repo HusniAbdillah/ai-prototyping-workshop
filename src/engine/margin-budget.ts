@@ -105,6 +105,8 @@ export function evaluateMarginAndBudget(
       severity,
       metricValue: cumulativeBurn,
       dealPrice: sampleSale.dealPrice,
+      platformSubsidy: sampleSale.platformSubsidy,
+      sellerVoucher: sampleSale.sellerVoucher,
       estimatedFee: estFee,
       netPayout,
       cogs: master.cogs,

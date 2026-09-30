@@ -55,8 +55,9 @@ export interface AnomalyResult {
   severity: IssueSeverity;
   metricValue: number; // Nilai kerugian (Rp) ATAU sisa jam runway
 
-  // Field Finansial Rinci
   dealPrice?: number;
+  platformSubsidy?: number;
+  sellerVoucher?: number;
   estimatedFee?: number;
   netPayout?: number;
   cogs?: number;
