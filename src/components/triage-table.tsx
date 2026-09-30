@@ -67,7 +67,7 @@ function MetricCell({ anomaly }: { anomaly: AnomalyResult }) {
       {anomaly.budgetCap ? (
         <p>
           Budget cap: {formatRupiah(anomaly.budgetCap)} (
-          {formatPercent(((anomaly.cumulativeBurn ?? 0) / anomaly.budgetCap) * 100)}
+          {formatPercent(((anomaly.cumulativeBurn ?? 0) / (anomaly.budgetCap || 1)) * 100)}
           )
         </p>
       ) : null}

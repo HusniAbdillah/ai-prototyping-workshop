@@ -92,8 +92,33 @@ export default function App() {
         setIsProcessing(false);
       }
     },
-    [routingConfig, play, stop],
+    [routingConfig],
   );
+
+  const loadDemoData = useCallback(async () => {
+    setIsProcessing(true);
+    try {
+      const filesToFetch = [
+        "shopee_sales_report.csv",
+        "tiktok_sales_report.csv",
+        "internal_master_data.csv",
+        "shopee_inventory_report.csv"
+      ];
+      const fetchedFiles: File[] = [];
+      for (const name of filesToFetch) {
+        const res = await fetch(`/data/${name}`);
+        if (!res.ok) continue;
+        const text = await res.text();
+        fetchedFiles.push(new File([text], name, { type: "text/csv" }));
+      }
+      handleFilesChange(fetchedFiles);
+    } catch (e) {
+      console.error(e);
+      alert("Failed to load demo data.");
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [handleFilesChange]);
 
   // Actions
   const handleEscalate = useCallback(
@@ -210,9 +235,19 @@ export default function App() {
               <p className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto">Upload your sales report to automatically detect margin bleed and stockout risks with zero-backend processing.</p>
             </div>
 
-            <section className="bg-white/50 dark:bg-white/5 backdrop-blur-xl rounded-3xl p-6 lg:p-8 border border-gray-200 dark:border-white/10 shadow-sm max-w-3xl mx-auto">
+            <section className="bg-white/50 dark:bg-white/5 backdrop-blur-xl rounded-3xl p-6 lg:p-8 border border-gray-200 dark:border-white/10 shadow-sm max-w-3xl mx-auto text-center">
               <Dropzone files={files} onFilesChange={handleFilesChange} isLoading={isProcessing} />
               
+              <div className="mt-4">
+                <button
+                  onClick={loadDemoData}
+                  disabled={isProcessing}
+                  className="px-6 py-2 rounded-xl border border-gray-300 dark:border-white/20 font-semibold hover:bg-gray-100 dark:hover:bg-white/10 transition-all text-sm text-gray-700 dark:text-gray-300"
+                >
+                  {isProcessing ? "Loading..." : "Load Demo Data"}
+                </button>
+              </div>
+
               {/* Feedback on File Processing */}
               {(recognizedRoles.length > 0 || skippedFiles.length > 0) && (
                 <div className="mt-6 pt-6 border-t border-gray-200 dark:border-white/10 text-sm space-y-2">
