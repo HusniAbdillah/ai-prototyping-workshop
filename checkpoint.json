@@ -1,0 +1,747 @@
+{
+  "project": "SIRCLO Insight - Omnichannel Anomaly Detection Engine",
+  "version": "1.0.0",
+  "description": "Comprehensive engineering checkpoints and deep edge-case analysis generated from docs 01 to 08.",
+  "generated_at": "2026-09-30T15:15:00+07:00",
+  "summary": {
+    "total_checkpoints": 26,
+    "categories": [
+      "Financial & Margin Engine",
+      "Inventory & Runway Engine",
+      "Omnichannel Ingestion & Normalization",
+      "Incident Escalation & Triage UI",
+      "In-App Web Alerts & Notifications",
+      "System Boundaries & Memory Limits"
+    ]
+  },
+  "checkpoints": [
+    {
+      "id": "CHK-FIN-001",
+      "title": "Platform Subsidy Margin Trap (Miskonsepsi Harga Jual vs Subsidi Marketplace)",
+      "description": "Di marketplace modern (Shopee & TikTok), harga yang dibayar pembeli (Deal Price) seringkali jauh di bawah modal (COGS) karena adanya subsidi platform (misal diskon live streaming TikTok atau Shopee Rebate). Jika algoritma hanya menghitung 'Deal Price - COGS', sistem akan memunculkan alarm palsu (False Positive) bahwa penjual merugi. Analisis mendalam: Engine harus memvalidasi 'Final Revenue = Deal Price + Platform Subsidy - Seller Voucher'. Bila subsidi platform menutupi selisih modal sehingga True Margin >= 0, transaksi harus diklasifikasikan sebagai SAFE dan tidak membunyikan alarm ke Account Manager.",
+      "nama_test": "should evaluate transaction as SAFE when platform subsidy offsets deal price below COGS",
+      "testName": "should evaluate transaction as SAFE when platform subsidy offsets deal price below COGS",
+      "test_file": "tests/decision-engine/margin-budget.test.ts",
+      "testFile": "tests/decision-engine/margin-budget.test.ts",
+      "category": "Financial & Margin Engine",
+      "severity": "CRITICAL",
+      "doc_references": [
+        "docs/02_DOMAIN_DATA_SCHEMA.md",
+        "docs/06_TECH_SPEC.md",
+        "docs/07_LEARNINGS.md"
+      ],
+      "input_scenario": {
+        "sku": "SKU-BEAUTY-CREAM-01",
+        "dealPrice": 50000,
+        "platformSubsidy": 35000,
+        "sellerVoucher": 0,
+        "cogs": 80000,
+        "qtySold": 5
+      },
+      "expected_outcome": {
+        "finalRevenuePerUnit": 85000,
+        "trueMarginPerUnit": 5000,
+        "status": "SAFE",
+        "cumulativeBurn": 0,
+        "triggerEscalation": false
+      }
+    },
+    {
+      "id": "CHK-FIN-002",
+      "title": "Seller Voucher Stacking Bleed (Kebocoran Margin Akibat Diskon Ganda Penjual)",
+      "description": "Terjadi ketika Deal Price terlihat aman dan di atas COGS di etalase, namun penjual mengaktifkan voucher toko tambahan (Seller Voucher) yang ter-stack. Formula Final Revenue = Deal Price + Platform Subsidy - Seller Voucher menghasilkan True Margin negatif. Karena SKU ini tidak memiliki alokasi anggaran bakar uang (Promo Budget Cap = 0), seluruh kerugian merupakan kebocoran modal murni. Analisis mendalam: Engine harus langsung mengkategorikan anomali ini sebagai CRITICAL MARGIN_BLEED dan menghitung total akumulasi kerugian (True Margin * Qty Sold).",
+      "nama_test": "should flag CRITICAL MARGIN_BLEED when seller voucher stacking causes negative margin on non-promo SKU",
+      "testName": "should flag CRITICAL MARGIN_BLEED when seller voucher stacking causes negative margin on non-promo SKU",
+      "test_file": "tests/decision-engine/margin-budget.test.ts",
+      "testFile": "tests/decision-engine/margin-budget.test.ts",
+      "category": "Financial & Margin Engine",
+      "severity": "CRITICAL",
+      "doc_references": [
+        "docs/02_DOMAIN_DATA_SCHEMA.md",
+        "docs/03_DECISION_ENGINE_RULES.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "sku": "SKU-GADGET-EARPHONE-BLK",
+        "dealPrice": 95000,
+        "platformSubsidy": 0,
+        "sellerVoucher": 25000,
+        "cogs": 90000,
+        "promoBudgetCap": 0,
+        "qtySold": 10
+      },
+      "expected_outcome": {
+        "finalRevenuePerUnit": 70000,
+        "trueMarginPerUnit": -20000,
+        "status": "CRITICAL",
+        "issueType": "MARGIN_BLEED",
+        "cumulativeBurn": 200000,
+        "triggerEscalation": true
+      }
+    },
+    {
+      "id": "CHK-FIN-003",
+      "title": "Intentional Burn Under Budget Cap (Bakar Uang Pemasaran yang Terencana)",
+      "description": "Tidak semua penjualan di bawah modal adalah kesalahan teknis; seringkali brand secara sengaja menjual produk hero di bawah COGS untuk akuisisi pelanggan (misal campaign 11.11 Flash Sale) dengan anggaran subsidi tertentu. Analisis mendalam: Jika True Margin < 0 namun total Cumulative Burn masih <= 70% dari Promo Budget Cap yang terdaftar di Master Catalog, sistem TIDAK boleh mengirimkan alarm darurat ke Account Manager, melainkan mengklasifikasikan transaksi sebagai 'BUDGET SAFE' agar tim marketing tidak terganggu dengan alarm palsu.",
+      "nama_test": "should classify negative margin as BUDGET SAFE when cumulative burn is <= 70% of Promo Budget Cap",
+      "testName": "should classify negative margin as BUDGET SAFE when cumulative burn is <= 70% of Promo Budget Cap",
+      "test_file": "tests/decision-engine/margin-budget.test.ts",
+      "testFile": "tests/decision-engine/margin-budget.test.ts",
+      "category": "Financial & Margin Engine",
+      "severity": "SAFE",
+      "doc_references": [
+        "docs/02_DOMAIN_DATA_SCHEMA.md",
+        "docs/03_DECISION_ENGINE_RULES.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "sku": "SKU-HERO-SERUM-30ML",
+        "cogs": 100000,
+        "dealPrice": 85000,
+        "platformSubsidy": 5000,
+        "sellerVoucher": 0,
+        "promoBudgetCap": 5000000,
+        "qtySold": 200
+      },
+      "expected_outcome": {
+        "lossPerUnit": 10000,
+        "cumulativeBurn": 2000000,
+        "burnPercentage": 40.0,
+        "status": "SAFE",
+        "issueType": "NONE",
+        "triggerEscalation": false
+      }
+    },
+    {
+      "id": "CHK-FIN-004",
+      "title": "Watchlist Warning Threshold (Penyerapan Anggaran Promo Mencapai 70% - 90%)",
+      "description": "Ketika penjualan promo berlangsung masif dan akumulasi bakar uang menyentuh zona kuning (antara > 70% hingga <= 90% dari batas promo budget), Account Manager butuh informasi preventif sebelum anggaran benar-benar jebol. Analisis mendalam: Engine harus menaikkan level status menjadi 'WARNING' (Watchlist), menampilkan sisa kuota subsidi yang tersisa, dan memberikan rekomendasi untuk memantau performa campaign sebelum flash sale berakhir.",
+      "nama_test": "should trigger WARNING watchlist alert when cumulative burn reaches between 70% and 90% of cap",
+      "testName": "should trigger WARNING watchlist alert when cumulative burn reaches between 70% and 90% of cap",
+      "test_file": "tests/decision-engine/margin-budget.test.ts",
+      "testFile": "tests/decision-engine/margin-budget.test.ts",
+      "category": "Financial & Margin Engine",
+      "severity": "WARNING",
+      "doc_references": [
+        "docs/03_DECISION_ENGINE_RULES.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "sku": "SKU-SNACK-CHOCO-PACK",
+        "cogs": 30000,
+        "dealPrice": 22000,
+        "platformSubsidy": 0,
+        "sellerVoucher": 0,
+        "promoBudgetCap": 1000000,
+        "qtySold": 100
+      },
+      "expected_outcome": {
+        "lossPerUnit": 8000,
+        "cumulativeBurn": 800000,
+        "burnPercentage": 80.0,
+        "status": "WARNING",
+        "issueType": "BUDGET_BREACH",
+        "triggerEscalation": false
+      }
+    },
+    {
+      "id": "CHK-FIN-005",
+      "title": "Catastrophic Budget Breach (Overburn Melampaui 100% Batas Promo)",
+      "description": "Anomali fatal di mana kuota subsidi promo terlampaui (Cumulative Burn > 100% Promo Budget Cap), biasanya disebabkan oleh ledakan order tanpa adanya stok limit di Seller Center atau lupa mematikan voucher. Analisis mendalam: Engine harus menghasilkan status CRITICAL BUDGET_BREACH dengan nilai metrik kerugian riil di atas anggaran, serta menghasilkan teks URL WhatsApp siap kirim yang menginstruksikan penghentian campaign / penonaktifan voucher saat itu juga.",
+      "nama_test": "should trigger CRITICAL BUDGET_BREACH when burn exceeds 100% of promo budget cap",
+      "testName": "should trigger CRITICAL BUDGET_BREACH when burn exceeds 100% of promo budget cap",
+      "test_file": "tests/decision-engine/margin-budget.test.ts",
+      "testFile": "tests/decision-engine/margin-budget.test.ts",
+      "category": "Financial & Margin Engine",
+      "severity": "CRITICAL",
+      "doc_references": [
+        "docs/03_DECISION_ENGINE_RULES.md",
+        "docs/04_INCIDENT_ESCALATION.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "sku": "SKU-LIPSTICK-MATTE-RED",
+        "cogs": 60000,
+        "dealPrice": 45000,
+        "platformSubsidy": 0,
+        "sellerVoucher": 0,
+        "promoBudgetCap": 1000000,
+        "qtySold": 120
+      },
+      "expected_outcome": {
+        "lossPerUnit": 15000,
+        "cumulativeBurn": 1800000,
+        "burnPercentage": 180.0,
+        "status": "CRITICAL",
+        "issueType": "BUDGET_BREACH",
+        "triggerEscalation": true
+      }
+    },
+    {
+      "id": "CHK-FIN-006",
+      "title": "Cross-Order Burn Aggregation Across Omnichannel Streams",
+      "description": "Sebuah SKU dijual secara simultan di Shopee dan TikTok. Sebagian transaksi menghasilkan keuntungan (profitable karena ada platform subsidy), sedangkan sebagian transaksi lain mengalami kerugian (karena voucher toko). Analisis mendalam: Engine tidak boleh menutupi kerugian transaksi minus dengan laba transaksi plus secara net aggregate jika tujuannya melacak kebocoran voucher promo. Kerugian dari tiap transaksi minus harus diakumulasikan ke burn tracker sesuai spesifikasi di 06_TECH_SPEC.md.",
+      "nama_test": "should accurately aggregate cumulative burn strictly from loss-making orders across multiple marketplaces",
+      "testName": "should accurately aggregate cumulative burn strictly from loss-making orders across multiple marketplaces",
+      "test_file": "tests/decision-engine/margin-budget.test.ts",
+      "testFile": "tests/decision-engine/margin-budget.test.ts",
+      "category": "Financial & Margin Engine",
+      "severity": "CRITICAL",
+      "doc_references": [
+        "docs/02_DOMAIN_DATA_SCHEMA.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "sku": "SKU-OMNI-MOUSE-RGB",
+        "cogs": 100000,
+        "promoBudgetCap": 200000,
+        "transactions": [
+          { "marketplace": "SHOPEE", "dealPrice": 120000, "platformSubsidy": 0, "sellerVoucher": 0, "qtySold": 5 },
+          { "marketplace": "TIKTOK", "dealPrice": 70000, "platformSubsidy": 0, "sellerVoucher": 0, "qtySold": 4 },
+          { "marketplace": "SHOPEE", "dealPrice": 60000, "platformSubsidy": 10000, "sellerVoucher": 0, "qtySold": 3 }
+        ]
+      },
+      "expected_outcome": {
+        "shopeeOrder1TrueMargin": 20000,
+        "tiktokOrderTrueMargin": -30000,
+        "shopeeOrder2TrueMargin": -30000,
+        "totalBurnAccumulated": 210000,
+        "status": "CRITICAL",
+        "issueType": "BUDGET_BREACH"
+      }
+    },
+    {
+      "id": "CHK-FIN-007",
+      "title": "Extreme Price Boundary: Zero Price / Freebie Order Handling",
+      "description": "Dalam kampanye flash deal atau pemberian produk gratis (Buy 1 Get 1 freebie), Deal Price tercatat 0 atau Seller Voucher sama dengan Deal Price. Analisis mendalam: Engine harus menangani pembagian dan operasi matematika tanpa menghasilkan nilai NaN, infinity tak terduga, atau string error, serta mengakumulasi kerugian senilai COGS penuh dikalikan kuantitas gratis yang keluar.",
+      "nama_test": "should handle zero deal price orders without NaN and calculate full COGS loss",
+      "testName": "should handle zero deal price orders without NaN and calculate full COGS loss",
+      "test_file": "tests/decision-engine/margin-budget.test.ts",
+      "testFile": "tests/decision-engine/margin-budget.test.ts",
+      "category": "Financial & Margin Engine",
+      "severity": "CRITICAL",
+      "doc_references": [
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "sku": "SKU-FREEBIE-SAMPLE-POUCH",
+        "dealPrice": 0,
+        "platformSubsidy": 0,
+        "sellerVoucher": 0,
+        "cogs": 15000,
+        "promoBudgetCap": 0,
+        "qtySold": 20
+      },
+      "expected_outcome": {
+        "finalRevenue": 0,
+        "trueMarginPerUnit": -15000,
+        "cumulativeBurn": 300000,
+        "status": "CRITICAL",
+        "issueType": "MARGIN_BLEED"
+      }
+    },
+    {
+      "id": "CHK-INV-001",
+      "title": "Moving-Window Velocity vs 24-Hour Average Skew (Flash Sale Spike Detection)",
+      "description": "Jebakan metrik klasik: Menghitung rata-rata kecepatan penjualan harian (24 jam) saat event flash sale 11.11. Jika barang terjual 300 unit dalam 2 jam terakhir padahal 22 jam sebelumnya hanya laku 10 unit, rata-rata 24 jam menunjukkan kecepatan ~12.9 unit/jam (terlihat aman). Namun Moving Window 3 jam mendeteksi kecepatan riil 100 unit/jam. Analisis mendalam: Engine harus secara ketat menggunakan filter timestamp 'currentTime - windowHours' untuk menangkap lonjakan kecepatan penjualan dan mencegah OOS tak terdeteksi.",
+      "nama_test": "should accurately compute velocity based on 3-hour moving window instead of flat daily average",
+      "testName": "should accurately compute velocity based on 3-hour moving window instead of flat daily average",
+      "test_file": "tests/decision-engine/runway-oos.test.ts",
+      "testFile": "tests/decision-engine/runway-oos.test.ts",
+      "category": "Inventory & Runway Engine",
+      "severity": "CRITICAL",
+      "doc_references": [
+        "docs/02_DOMAIN_DATA_SCHEMA.md",
+        "docs/03_DECISION_ENGINE_RULES.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "sku": "SKU-VIRAL-SUNSCREEN",
+        "currentMarketplaceStock": 150,
+        "timeWindowHours": 3,
+        "salesInLast3Hours": 300,
+        "salesEarlierInDay": 20
+      },
+      "expected_outcome": {
+        "calculatedVelocity": 100.0,
+        "stockRunwayHours": 1.5,
+        "status": "WARNING",
+        "issueType": "OOS_RISK"
+      }
+    },
+    {
+      "id": "CHK-INV-002",
+      "title": "Zero Velocity Guard: Division by Zero Prevention on Stagnant Inventory",
+      "description": "Untuk SKU yang slow-moving atau tidak ada penjualan sama sekali dalam jendela 3 jam terakhir (totalQtySold = 0), rumus 'Current_Stock / Sales_Velocity' akan melakukan pembagian dengan angka nol. Dalam JavaScript ini menghasilkan Infinity. Analisis mendalam: Engine harus memiliki guard clause 'if (velocityPerHour === 0) return null' untuk mencegah render nilai Infinity pada UI triase, serta mengkategorikannya sebagai SAFE (Slow Moving).",
+      "nama_test": "should prevent division by zero and return null when sales velocity in time window is zero",
+      "testName": "should prevent division by zero and return null when sales velocity in time window is zero",
+      "test_file": "tests/decision-engine/runway-oos.test.ts",
+      "testFile": "tests/decision-engine/runway-oos.test.ts",
+      "category": "Inventory & Runway Engine",
+      "severity": "SAFE",
+      "doc_references": [
+        "docs/03_DECISION_ENGINE_RULES.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "sku": "SKU-WINTER-JACKET-HEAVY",
+        "currentMarketplaceStock": 45,
+        "salesInWindow": 0,
+        "timeWindowHours": 3
+      },
+      "expected_outcome": {
+        "velocity": 0,
+        "runway": null,
+        "result": null,
+        "uiState": "SUPPRESSED_FROM_TRIAGE"
+      }
+    },
+    {
+      "id": "CHK-INV-003",
+      "title": "Actionable OOS Warning with Available Global Buffer (Stock Rebalancing SOP)",
+      "description": "Ketika stok etalase marketplace menipis hingga runway <= 12 jam, namun gudang internal masih memiliki stok pengaman (Global_Buffer > 0). Kondisi ini BUKAN malapetaka permanen melainkan peluang penyelamatan omset via rebalancing stok. Analisis mendalam: Engine harus menetapkan severity 'WARNING', merekomendasikan jumlah unit injeksi sebesar (velocity * 24 jam), dan menghasilkan payload WhatsApp langsung ke tim Warehouse.",
+      "nama_test": "should trigger WARNING with rebalance recommendation when runway <= 12 hours and global buffer > 0",
+      "testName": "should trigger WARNING with rebalance recommendation when runway <= 12 hours and global buffer > 0",
+      "test_file": "tests/decision-engine/runway-oos.test.ts",
+      "testFile": "tests/decision-engine/runway-oos.test.ts",
+      "category": "Inventory & Runway Engine",
+      "severity": "WARNING",
+      "doc_references": [
+        "docs/03_DECISION_ENGINE_RULES.md",
+        "docs/04_INCIDENT_ESCALATION.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "sku": "SKU-BEVERAGE-COFFEE-CAN",
+        "currentMarketplaceStock": 40,
+        "globalBuffer": 200,
+        "velocityPerHour": 10.0
+      },
+      "expected_outcome": {
+        "runwayHours": 4.0,
+        "severity": "WARNING",
+        "issueType": "OOS_RISK",
+        "recommendedRebalance": 240,
+        "isTotalOOS": false
+      }
+    },
+    {
+      "id": "CHK-INV-004",
+      "title": "Unsalvageable Critical OOS: Depleted Warehouse Global Buffer",
+      "description": "Kondisi paling darurat di mana runway <= 12 jam DAN Global Buffer gudang sudah bernilai 0 (atau negatif). Barang fisik benar-benar habis di seluruh channel. Rebalancing internal tidak mungkin dilakukan. Analisis mendalam: Engine harus menaikkan status menjadi 'CRITICAL', memperingatkan bahwa barang tak bersisa di gudang, dan memicu instruksi eskalasi untuk segera menurunkan budget iklan berbayar (Ads) atau menaikkan harga untuk memperlambat laju sebelum terkena penalti cancel marketplace.",
+      "nama_test": "should flag CRITICAL OOS_RISK when runway <= 12 hours and global buffer is exhausted",
+      "testName": "should flag CRITICAL OOS_RISK when runway <= 12 hours and global buffer is exhausted",
+      "test_file": "tests/decision-engine/runway-oos.test.ts",
+      "testFile": "tests/decision-engine/runway-oos.test.ts",
+      "category": "Inventory & Runway Engine",
+      "severity": "CRITICAL",
+      "doc_references": [
+        "docs/03_DECISION_ENGINE_RULES.md",
+        "docs/04_INCIDENT_ESCALATION.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "sku": "SKU-TWS-EARBUDS-WHITE",
+        "currentMarketplaceStock": 15,
+        "globalBuffer": 0,
+        "velocityPerHour": 5.0
+      },
+      "expected_outcome": {
+        "runwayHours": 3.0,
+        "severity": "CRITICAL",
+        "issueType": "OOS_RISK",
+        "actionMessageContains": "TIDAK ADA BUFFER",
+        "isTotalOOS": true
+      }
+    },
+    {
+      "id": "CHK-INV-005",
+      "title": "Already Stocked-Out Anomaly (Current Marketplace Stock = 0 with Active Demand)",
+      "description": "Kasus batas di mana stok etalase marketplace sudah tepat 0 (Out of Stock), namun histori transaksi baru saja terjadi. Rumus runway menghasilkan nilai 0 jam. Analisis mendalam: Engine harus memastikan tidak terjadi error runtime saat menangani stok 0, langsung menandai baris sebagai CRITICAL OOS dengan runway 0 jam, dan memandu Account Manager untuk segera mengambil tindakan tanpa menunggu interval triase berikutnya.",
+      "nama_test": "should immediately flag CRITICAL when current marketplace stock reaches zero",
+      "testName": "should immediately flag CRITICAL when current marketplace stock reaches zero",
+      "test_file": "tests/decision-engine/runway-oos.test.ts",
+      "testFile": "tests/decision-engine/runway-oos.test.ts",
+      "category": "Inventory & Runway Engine",
+      "severity": "CRITICAL",
+      "doc_references": [
+        "docs/03_DECISION_ENGINE_RULES.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "sku": "SKU-LIMITED-EDITION-BAG",
+        "currentMarketplaceStock": 0,
+        "globalBuffer": 50,
+        "velocityPerHour": 8.0
+      },
+      "expected_outcome": {
+        "runwayHours": 0.0,
+        "severity": "CRITICAL",
+        "issueType": "OOS_RISK"
+      }
+    },
+    {
+      "id": "CHK-INV-006",
+      "title": "Cross-Channel Velocity Disparity (Pareto Stock Allocation Logic)",
+      "description": "SKU yang sama memiliki kecepatan penjualan jomplang antara 2 channel (misal TikTok Live laku 80 unit/jam sedangkan Shopee hanya 20 unit/jam). Jika alokasi Global Buffer dibagi rata 50:50, TikTok akan mengalami OOS dalam 2 jam sementara Shopee kelebihan stok. Analisis mendalam: Engine harus mengevaluasi proporsi perbandingan velocity lintas marketplace dan memvalidasi alokasi rebalancing berbasis Pareto (Rule 3) proporsional terhadap kontribusi laju masing-masing channel.",
+      "nama_test": "should apportion warehouse buffer proportionally based on cross-channel velocity ratio",
+      "testName": "should apportion warehouse buffer proportionally based on cross-channel velocity ratio",
+      "test_file": "tests/decision-engine/runway-oos.test.ts",
+      "testFile": "tests/decision-engine/runway-oos.test.ts",
+      "category": "Inventory & Runway Engine",
+      "severity": "WARNING",
+      "doc_references": [
+        "docs/03_DECISION_ENGINE_RULES.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "sku": "SKU-TRENDING-TOTEBAG",
+        "globalBuffer": 100,
+        "channelVelocities": {
+          "TIKTOK": 80.0,
+          "SHOPEE": 20.0
+        }
+      },
+      "expected_outcome": {
+        "tiktokAllocationRatio": 0.8,
+        "shopeeAllocationRatio": 0.2,
+        "recommendedTiktokAllocation": 80,
+        "recommendedShopeeAllocation": 20
+      }
+    },
+    {
+      "id": "CHK-ING-001",
+      "title": "Disparate Header Normalization Across Shopee, TikTok & Internal CSVs",
+      "description": "Laporan penjualan mentah dari masing-masing platform menggunakan penamaan kolom yang berbeda: Shopee menggunakan 'Deal Price' & 'Shopee Rebate', TikTok menggunakan 'Sale Price' & 'Platform Subsidy', sedangkan ERP internal menggunakan 'COGS' & 'Global Buffer Stock'. Analisis mendalam: Parser ingestion harus memetakan alias kolom yang berbeda ke antarmuka standar OmnichannelSaleRow dan MasterCatalogRow secara deterministik tanpa menuntut pengguna mengubah file Excel secara manual.",
+      "nama_test": "should normalize distinct marketplace header aliases into unified OmnichannelSaleRow interface",
+      "testName": "should normalize distinct marketplace header aliases into unified OmnichannelSaleRow interface",
+      "test_file": "tests/ingestion/csv-parser.test.ts",
+      "testFile": "tests/ingestion/csv-parser.test.ts",
+      "category": "Omnichannel Ingestion & Normalization",
+      "severity": "CRITICAL",
+      "doc_references": [
+        "docs/02_DOMAIN_DATA_SCHEMA.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "shopeeHeaders": ["Order ID", "SKU", "Order Creation Time", "Quantity", "Deal Price", "Seller Voucher", "Shopee Rebate"],
+        "tiktokHeaders": ["Order ID", "Seller SKU", "Created Time", "Quantity", "Sale Price", "Discount (Seller)", "Platform Subsidy"]
+      },
+      "expected_outcome": {
+        "normalizedFields": ["orderId", "sku", "orderTimestamp", "qtySold", "dealPrice", "sellerVoucher", "platformSubsidy"]
+      }
+    },
+    {
+      "id": "CHK-ING-002",
+      "title": "Indonesian Currency String Sanitization & Numeric Casting",
+      "description": "Eksportir CSV lokal sering memformat angka dengan simbol mata uang, spasi, atau pemisah ribuan titik/koma (misal: 'Rp 150.000', '150,000.00', 'Rp-25.000'). Jika string ini langsung di-cast dengan Number(), JavaScript menghasilkan NaN. Analisis mendalam: Pipeline parser wajib membersihkan karakter non-numerik (kecuali minus/titik desimal) sebelum data masuk ke Decision Engine.",
+      "nama_test": "should sanitize formatted currency strings with symbols, spaces, and commas to raw integer numbers",
+      "testName": "should sanitize formatted currency strings with symbols, spaces, and commas to raw integer numbers",
+      "test_file": "tests/ingestion/csv-parser.test.ts",
+      "testFile": "tests/ingestion/csv-parser.test.ts",
+      "category": "Omnichannel Ingestion & Normalization",
+      "severity": "CRITICAL",
+      "doc_references": [
+        "docs/02_DOMAIN_DATA_SCHEMA.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "rawValues": ["Rp 120.000", "Rp15.500,00", "-Rp 5.000", "0", " 45000 "]
+      },
+      "expected_outcome": {
+        "parsedNumbers": [120000, 15500, -5000, 0, 45000]
+      }
+    },
+    {
+      "id": "CHK-ING-003",
+      "title": "Orphan / Unmatched SKU Handling between Sales Report and Master Catalog",
+      "description": "Laporan penjualan marketplace memuat SKU baru (atau SKU bundle yang salah ketik oleh admin) yang belum terdaftar di Master Catalog internal (tidak memiliki data COGS atau Promo Budget). Analisis mendalam: Engine tidak boleh melempar runtime exception 'Cannot read property cogs of undefined'. Engine harus melewati (skip) baris tersebut dengan aman dan mencatatnya ke dalam daftar unmapped anomalies untuk diverifikasi AM.",
+      "nama_test": "should gracefully handle transactions with unmatched SKUs without throwing undefined runtime error",
+      "testName": "should gracefully handle transactions with unmatched SKUs without throwing undefined runtime error",
+      "test_file": "tests/ingestion/csv-parser.test.ts",
+      "testFile": "tests/ingestion/csv-parser.test.ts",
+      "category": "Omnichannel Ingestion & Normalization",
+      "severity": "WARNING",
+      "doc_references": [
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "transactionSku": "SKU-UNKNOWN-NEW-BUNDLE-99",
+        "masterCatalogSkus": ["SKU-01", "SKU-02", "SKU-03"]
+      },
+      "expected_outcome": {
+        "isEngineCrashed": false,
+        "handledSafely": true
+      }
+    },
+    {
+      "id": "CHK-ING-004",
+      "title": "Malformed Rows, Empty Lines, and Encoding Glitches (BOM UTF-8)",
+      "description": "File CSV hasil unduhan Seller Center kerap memiliki baris kosong di akhir dokumen, separator tidak konsisten, atau diawali dengan BOM UTF-8 (\\uFEFF). Analisis mendalam: Konfigurasi PapaParse harus diset dengan 'skipEmptyLines: true' dan penanganan encoding yang tepat agar tidak ada entri sampah bernilai null/NaN yang mengotori memori kalkulasi.",
+      "nama_test": "should strip UTF-8 BOM and skip malformed or empty trailing rows during PapaParse streaming",
+      "testName": "should strip UTF-8 BOM and skip malformed or empty trailing rows during PapaParse streaming",
+      "test_file": "tests/ingestion/csv-parser.test.ts",
+      "testFile": "tests/ingestion/csv-parser.test.ts",
+      "category": "Omnichannel Ingestion & Normalization",
+      "severity": "WARNING",
+      "doc_references": [
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "csvContentWithBom": "\uFEFFOrder ID,SKU,Deal Price\nSHP-01,SKU-A,10000\n\n,,,\n   \n"
+      },
+      "expected_outcome": {
+        "validRowCount": 1,
+        "orderIdExtracted": "SHP-01"
+      }
+    },
+    {
+      "id": "CHK-ESC-001",
+      "title": "WhatsApp Deep-Link URI Encoding and Action Payload Formatting",
+      "description": "Tombol eskalasi 1-klik menghasilkan Universal Link WhatsApp (wa.me) yang memuat ringkasan insiden (Channel, SKU, Harga Terjual, COGS, Nilai Kerugian, dan Rekomendasi Aksi). Analisis mendalam: Semua parameter teks harus di-encode dengan encodeURIComponent() agar karakter emoji (🚨, ⚠️), line break (%0A), dan simbol khusus tidak merusak URL browser serta langsung terbaca sempurna di aplikasi WhatsApp penerima.",
+      "nama_test": "should generate properly URI-encoded WhatsApp escalation link with required SOP parameters",
+      "testName": "should generate properly URI-encoded WhatsApp escalation link with required SOP parameters",
+      "test_file": "tests/escalation/whatsapp-url.test.ts",
+      "testFile": "tests/escalation/whatsapp-url.test.ts",
+      "category": "Incident Escalation & Triage UI",
+      "severity": "CRITICAL",
+      "doc_references": [
+        "docs/04_INCIDENT_ESCALATION.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "channel": "TIKTOK",
+        "sku": "MS-WL-PRO-BLK",
+        "dealPrice": 80000,
+        "cogs": 100000,
+        "lossPerItem": 20000
+      },
+      "expected_outcome": {
+        "urlPrefix": "https://wa.me/",
+        "containsEncodedLineBreaks": true,
+        "containsSku": true,
+        "containsActionRequired": true
+      }
+    },
+    {
+      "id": "CHK-ESC-002",
+      "title": "Triage UI Signal Filtering: Strict Suppression of Noise (Safe Rows)",
+      "description": "Prinsip utama produk (Signal vs Noise): Account Manager tidak boleh dibanjiri ratusan baris produk yang sehat. Jika dari 1.000 SKU terdapat 985 SKU berstatus SAFE / BUDGET SAFE, tampilan UI tabel triase harus secara ketat menyaring dan HANYA merender 15 baris yang berstatus CRITICAL atau WARNING. Analisis mendalam: Filter reaktif ini menjamin waktu triase AM tetap di bawah 30 detik tanpa scrolling berlebihan.",
+      "nama_test": "should suppress all SAFE and BUDGET_SAFE items from the primary triage list view",
+      "testName": "should suppress all SAFE and BUDGET_SAFE items from the primary triage list view",
+      "test_file": "tests/escalation/whatsapp-url.test.ts",
+      "testFile": "tests/escalation/whatsapp-url.test.ts",
+      "category": "Incident Escalation & Triage UI",
+      "severity": "CRITICAL",
+      "doc_references": [
+        "docs/01_PRODUCT_VISION_PRD.md",
+        "docs/06_TECH_SPEC.md",
+        "docs/07_LEARNINGS.md"
+      ],
+      "input_scenario": {
+        "totalEvaluatedSkus": 500,
+        "criticalCount": 3,
+        "warningCount": 7,
+        "safeCount": 490
+      },
+      "expected_outcome": {
+        "visibleTriageRowCount": 10,
+        "hiddenSafeRowCount": 490
+      }
+    },
+    {
+      "id": "CHK-SYS-001",
+      "title": "Strict Edge Boundary: 50MB File Limit & Non-Blocking Web Worker Parsing",
+      "description": "Batasan eksekusi client-side (06_TECH_SPEC.md): Berjalan 100% di browser tanpa backend persisten. Jika pengguna mengunggah CSV lebih besar dari batas aman 50MB, memori V8 heap browser bisa crash. Parser PapaParse harus dikonfigurasi dengan worker: true agar thread UI tetap 60fps responsif selama proses decoding puluhan ribu baris data.",
+      "nama_test": "should enforce 50MB file size ceiling and execute PapaParse on a background Web Worker thread",
+      "testName": "should enforce 50MB file size ceiling and execute PapaParse on a background Web Worker thread",
+      "test_file": "tests/ingestion/csv-parser.test.ts",
+      "testFile": "tests/ingestion/csv-parser.test.ts",
+      "category": "System Boundaries & Memory Limits",
+      "severity": "CRITICAL",
+      "doc_references": [
+        "docs/05_SYSTEM_ARCHITECTURE.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "oversizedFileSizeBytes": 55000000,
+        "validFileSizeBytes": 15000000
+      },
+      "expected_outcome": {
+        "oversizedFileRejected": true,
+        "validFileAccepted": true,
+        "workerFlagConfigured": true
+      }
+    },
+    {
+      "id": "CHK-NOTIF-001",
+      "title": "In-App Toast & Synthesized Audio Chime on Critical Anomaly Discovery",
+      "description": "Ketika proses kalkulasi CSV selesai dan engine menemukan minimal 1 anomali CRITICAL (misal Margin Bleed atau OOS Total), antarmuka web harus langsung memicu notifikasi visual (floating toast merah beranimasi pulse dengan ringkasan total kerugian) dan membunyikan nada lonceng peringatan halus via Web Audio API synthesizer (880Hz -> 440Hz dual tone). Analisis mendalam: Fitur ini tidak memerlukan file mp3 eksternal (mencegah error CORS atau network latency) dan dilengkapi tombol kontrol Mute/Unmute audio di navbar agar Account Manager dapat bekerja dengan tenang tanpa kehilangan kesadaran saat insiden genting terjadi.",
+      "nama_test": "should trigger visual pulse toast and synthesize audio chime alert when critical anomalies are detected",
+      "testName": "should trigger visual pulse toast and synthesize audio chime alert when critical anomalies are detected",
+      "test_file": "tests/notifications/web-alert.test.ts",
+      "testFile": "tests/notifications/web-alert.test.ts",
+      "category": "In-App Web Alerts & Notifications",
+      "severity": "CRITICAL",
+      "doc_references": [
+        "docs/04_INCIDENT_ESCALATION.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "criticalAnomaliesFound": 2,
+        "totalLossAmount": 1250000,
+        "audioMuted": false
+      },
+      "expected_outcome": {
+        "toastRendered": true,
+        "toastSeverity": "CRITICAL",
+        "audioChimeTriggered": true,
+        "toastMessageContains": "Terdeteksi 2 Kebocoran Margin Kritis"
+      }
+    },
+    {
+      "id": "CHK-NOTIF-002",
+      "title": "Dynamic Browser Tab Title & Favicon Badge for Background Multitasking",
+      "description": "Account Manager sering bekerja secara multitasking dengan banyak tab browser terbuka sembari mendownload report dari marketplace. Ketika tab SIRCLO Insight berada di latar belakang (background) dan parsing atau update menemukan anomali, sistem harus memperbarui document.title secara dinamis menjadi '(3) 🚨 SIRCLO Insight - Margin Bleed Terdeteksi!' dan mem-flash title berkala. Analisis mendalam: Begitu pengguna mengklik kembali ke tab (event window.onfocus), format judul tab kembali normal ke 'SIRCLO Insight - Anomaly Detection'.",
+      "nama_test": "should update document title with alert prefix and badge count during background multitasking",
+      "testName": "should update document title with alert prefix and badge count during background multitasking",
+      "test_file": "tests/notifications/web-alert.test.ts",
+      "testFile": "tests/notifications/web-alert.test.ts",
+      "category": "In-App Web Alerts & Notifications",
+      "severity": "WARNING",
+      "doc_references": [
+        "docs/04_INCIDENT_ESCALATION.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "activeAnomaliesCount": 3,
+        "isTabFocused": false
+      },
+      "expected_outcome": {
+        "documentTitle": "(3) 🚨 SIRCLO Insight - Margin Bleed Terdeteksi!",
+        "resetOnFocus": true
+      }
+    },
+    {
+      "id": "CHK-NOTIF-003",
+      "title": "Header Bell Notification Drawer with Auto-Scroll & Highlight Navigation",
+      "description": "Menyediakan komponen Notification Center di header/navbar berupa ikon lonceng dengan lencana merah (badge counter) berisi total anomali aktif. Saat diklik, popover drawer menampilkan daftar kartu peringatan ringkas. Mengklik salah satu notifikasi di drawer akan otomatis melakukan scroll halus (smooth scroll) dan memberikan efek kilau sementara (focus highlight) ke baris tabel yang bersangkutan sehingga AM dapat langsung mengambil tindakan 1-Click WhatsApp.",
+      "nama_test": "should render notification drawer with count badge and support jump-to-row navigation",
+      "testName": "should render notification drawer with count badge and support jump-to-row navigation",
+      "test_file": "tests/notifications/web-alert.test.ts",
+      "testFile": "tests/notifications/web-alert.test.ts",
+      "category": "In-App Web Alerts & Notifications",
+      "severity": "WARNING",
+      "doc_references": [
+        "docs/04_INCIDENT_ESCALATION.md",
+        "docs/06_TECH_SPEC.md"
+      ],
+      "input_scenario": {
+        "activeAlerts": [
+          { "id": "ALT-01", "sku": "MS-WL-PRO-BLK", "severity": "CRITICAL", "type": "MARGIN_BLEED" }
+        ],
+        "clickedAlertId": "ALT-01"
+      },
+      "expected_outcome": {
+        "bellBadgeCount": 1,
+        "targetRowId": "row-MS-WL-PRO-BLK",
+        "scrolledIntoView": true,
+        "highlightApplied": true
+      }
+    },
+    {
+      "id": "CHK-FIN-008",
+      "title": "Platform Commission & Admin Fee Margin Erosion (The 8.5% Hidden Fee Trap)",
+      "description": "Di ekosistem marketplace (Shopee Mall / Star Seller & TikTok Shop), transaksi dipotong biaya admin, biaya layanan gratis ongkir xtra, dan biaya transaksi rata-rata 8.5% - 12%. Jika barang berharga Rp100.000 dengan COGS Rp95.000 dijual tanpa voucher, perhitungan naif mencatat profit +Rp5.000. Padahal setelah potongan platform 8.5% (Rp8.500), uang yang cair ke rekening hanya Rp91.500 sehingga brand sebenarnya rugi modal Rp3.500/unit. Analisis mendalam: Engine harus memperhitungkan formula 'Net Realized Payout = Deal Price + Platform Subsidy - Seller Voucher - (Deal Price * Platform Fee Rate)'. Jika True Net Margin < 0 pada produk non-promo, sistem harus langsung memicu CRITICAL MARGIN_BLEED.",
+      "nama_test": "should detect margin bleed when marketplace commission fee turns apparent profit into net loss",
+      "testName": "should detect margin bleed when marketplace commission fee turns apparent profit into net loss",
+      "test_file": "tests/decision-engine/margin-budget.test.ts",
+      "testFile": "tests/decision-engine/margin-budget.test.ts",
+      "category": "Financial & Margin Engine",
+      "severity": "CRITICAL",
+      "doc_references": [
+        "docs/02_DOMAIN_DATA_SCHEMA.md",
+        "docs/03_DECISION_ENGINE_RULES.md",
+        "docs/06_TECH_SPEC.md",
+        "docs/07_LEARNINGS.md"
+      ],
+      "input_scenario": {
+        "sku": "SKU-SLIM-MARGIN-PRODUCT",
+        "dealPrice": 100000,
+        "sellerVoucher": 0,
+        "platformSubsidy": 0,
+        "cogs": 95000,
+        "platformFeeRate": 0.085,
+        "qtySold": 20
+      },
+      "expected_outcome": {
+        "estimatedPlatformFee": 8500,
+        "netRealizedPayout": 91500,
+        "trueNetMarginPerUnit": -3500,
+        "cumulativeBurn": 70000,
+        "status": "CRITICAL",
+        "issueType": "MARGIN_BLEED"
+      }
+    },
+    {
+      "id": "CHK-INV-007",
+      "title": "Emergency Store Penalty Mitigation (Buffer Gudang 0 & PO Supplier Ditolak)",
+      "description": "Ketika stok etalase marketplace menipis cepat (Runway <= 6 jam) namun stok fisik gudang sudah habis total (Global Buffer = 0) dan PO darurat ke supplier ditolak atau membutuhkan lead time 5 hari. Sistem tidak boleh memberikan rekomendasi naif 'suntik stok gudang'. Analisis mendalam: Sistem harus mengaktifkan protokol mitigasi darurat untuk mencegah toko terkena sanksi pembatalan massal marketplace (Non-Fulfillment Rate > 2%) dengan merekomendasikan: (1) Naikkan harga etalase 15% untuk mengerem velocity, dan (2) Matikan iklan berbayar (Ads/Live). Format WhatsApp otomatis ditujukan ke PIC Pricing/Ads.",
+      "nama_test": "should trigger emergency penalty mitigation protocol when global buffer is zero and runway is critical",
+      "testName": "should trigger emergency penalty mitigation protocol when global buffer is zero and runway is critical",
+      "test_file": "tests/decision-engine/runway-oos.test.ts",
+      "testFile": "tests/decision-engine/runway-oos.test.ts",
+      "category": "Inventory & Runway Engine",
+      "severity": "CRITICAL",
+      "doc_references": [
+        "docs/03_DECISION_ENGINE_RULES.md",
+        "docs/04_INCIDENT_ESCALATION.md",
+        "docs/06_TECH_SPEC.md",
+        "docs/07_LEARNINGS.md"
+      ],
+      "input_scenario": {
+        "sku": "SKU-NO-BUFFER-HERO",
+        "currentMarketplaceStock": 10,
+        "globalBuffer": 0,
+        "velocityPerHour": 4.0,
+        "timeWindowHours": 3
+      },
+      "expected_outcome": {
+        "runwayHours": 2.5,
+        "severity": "CRITICAL",
+        "recommendedAction": "PAUSE_ADS_PRICE_BUMP",
+        "targetPIC": "PRICING",
+        "actionMessageContains": "Matikan Iklan & Naikkan Harga"
+      }
+    },
+    {
+      "id": "CHK-ESC-003",
+      "title": "Team Escalation State Tracking & 1-Click Claim Report Generator",
+      "description": "Untuk mencegah 17 Account Manager melakukan eskalasi ganda ke grup operasional yang sama dan memfasilitasi pelaporan bulanan (Monthly Business Report / Claim Report), UI harus menyediakan pelacakan status lokal (isEscalated, escalatedAt) serta tombol 'Copy Shift Handover Report'. Analisis mendalam: Mengklik tombol copy harus merangkai rekapitulasi teks terformat rapi berisi daftar SKU bermasalah, nilai kerugian, status eskalasi, dan tindakan yang telah diambil ke clipboard.",
+      "nama_test": "should toggle escalation state and generate formatted plain text shift handover report for clipboard",
+      "testName": "should toggle escalation state and generate formatted plain text shift handover report for clipboard",
+      "test_file": "tests/escalation/whatsapp-url.test.ts",
+      "testFile": "tests/escalation/whatsapp-url.test.ts",
+      "category": "Incident Escalation & Triage UI",
+      "severity": "WARNING",
+      "doc_references": [
+        "docs/01_PRODUCT_VISION_PRD.md",
+        "docs/04_INCIDENT_ESCALATION.md",
+        "docs/06_TECH_SPEC.md",
+        "docs/07_LEARNINGS.md"
+      ],
+      "input_scenario": {
+        "anomalies": [
+          { "sku": "SKU-01", "issueType": "MARGIN_BLEED", "isEscalated": true, "metricValue": 500000 },
+          { "sku": "SKU-02", "issueType": "OOS_RISK", "isEscalated": false, "metricValue": 2.5 }
+        ]
+      },
+      "expected_outcome": {
+        "reportContainsHeader": true,
+        "reportContainsSku01": true,
+        "reportShowsEscalatedBadge": true,
+        "reportContainsSummaryLoss": true
+      }
+    }
+  ]
+}
