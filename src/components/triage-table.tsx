@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Check, Clock } from "lucide-react";
 import type { AnomalyResult, RecommendedAction } from "@/types/domain";
 import type { EscalationMap } from "@/types/escalation-state";
 import { Badge } from "@/components/ui/badge";
@@ -189,12 +189,14 @@ export function TriageTable({
                   </td>
                   <td className="px-3 py-2">
                     {record ? (
-                      <span className="text-xs text-emerald-600">
-                        ✅ Escalated at {formatClock(record.escalatedAt)}
+                      <span className="text-xs text-emerald-600 inline-flex items-center gap-1">
+                        <Check className="h-3.5 w-3.5 shrink-0" />
+                        <span>Escalated at {formatClock(record.escalatedAt)}</span>
                       </span>
                     ) : (
-                      <span className="text-xs text-muted-foreground">
-                        ⏳ Pending
+                      <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5 shrink-0" />
+                        <span>Pending</span>
                       </span>
                     )}
                   </td>

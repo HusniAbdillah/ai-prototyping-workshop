@@ -12,7 +12,7 @@ Masalah utamanya adalah ketiadaan sistem deteksi terpadu. AM harus mengunduh CSV
 ## 2. Signal vs Noise (Product Strategy)
 Fokus pada memecahkan *core friction* (Signal) dan mengabaikan distraksi *boilerplate* (Noise).
 
-| ❌ Distraksi (Noise) | ✅ Fokus Utama (Signal) | Alasan Eksekusi |
+| Distraksi (Noise) | Fokus Utama (Signal) | Alasan Eksekusi |
 | :--- | :--- | :--- |
 | **Integrasi Live API Platform** | **Drag & Drop CSV Dropzone** | Menunggu *approval API* butuh 3 bulan. AM butuh solusi hari ini. Unggah CSV 10 detik membuktikan *value* di Hari Ke-0. |
 | **Login & Role Permission** | **Sistem Lokal tanpa Login** | Akses kontrol tidak menambah *value* pada proses deteksi anomali. Data tetap 100% aman di RAM browser pengguna. |

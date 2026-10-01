@@ -6,7 +6,7 @@ Dokumen ini adalah rincian eksekusi *sprint* 90 menit tersebut, dilengkapi denga
 
 ---
 
-## 🚀 The 90-Minute Solo Sprint (Fase Eksekusi Saat Ini)
+## The 90-Minute Solo Sprint (Fase Eksekusi Saat Ini)
 
 **Tujuan:** Membangun MVP (Minimum Viable Product) yang bisa mendemonstrasikan unggahan CSV omnichannel, mendeteksi Margin Bleeding dengan memperhitungkan Marketplace Fee, mendeteksi risiko OOS Flash Sale, membunyikan Web Audio Chime, serta memicu WhatsApp SOP & Shift Handover Report.
 
@@ -18,12 +18,12 @@ Dokumen ini adalah rincian eksekusi *sprint* 90 menit tersebut, dilengkapi denga
 | **00:15 - 00:30** | **2. Omnichannel Ingestion Engine** | Mengimplementasikan Dropzone 3 file CSV (Shopee Sales, TikTok Sales, Master Catalog). Konfigurasi `PapaParse` dengan `worker: true`, sanitasi format mata uang Rupiah ("Rp", titik, koma), dan pemetaan alias kolom ke antarmuka standar `OmnichannelSaleRow`. |
 | **00:30 - 00:50** | **3. The Math & Decision Engine** | Mengimplementasikan fungsi `evaluateMarginAndBudget` (Rule 1) dengan memperhitungkan Platform Admin Fee (8.5%) dan Promo Budget Cap. Mengimplementasikan `evaluateRunway` (Rule 2) dengan moving-window 3 jam / 1 jam dan mitigasi darurat saat `Global Buffer = 0`. |
 | **00:50 - 00:70** | **4. High-Contrast Triage UI & In-App Alerts** | Membuat tabel triase dengan filter agresif (sembunyikan baris aman). Menambahkan Floating Toast merah darurat saat status `CRITICAL` ditemukan, trigger nada audio chime, flasher judul tab browser, dan Notification Bell drawer di navbar. |
-| **00:70 - 00:80** | **5. Escalation & Team Handover** | Menghubungkan tombol `[Escalate via WhatsApp]` dengan deep-link `wa.me` terformat sesuai SOP (Pricing vs Warehouse PIC). Mengubah status lokal baris menjadi `[✅ ESCALATED]` dan menambahkan tombol **"📋 Copy Shift Handover Report"** untuk materi *Monthly Business Report (MBR)*. |
+| **00:70 - 00:80** | **5. Escalation & Team Handover** | Menghubungkan tombol `[Escalate via WhatsApp]` dengan deep-link `wa.me` terformat sesuai SOP (Pricing vs Warehouse PIC). Mengubah status lokal baris menjadi `[ESCALATED]` dan menambahkan tombol **"Copy Shift Handover Report"** untuk materi *Monthly Business Report (MBR)*. |
 | **00:80 - 00:90** | **6. End-to-End QA & Demo Dry Run** | Menguji prototipe menggunakan dataset CSV di folder `data/` (`shopee_sales_report.csv`, `tiktok_sales_report.csv`, `internal_master_data.csv`). Memastikan seluruh skenario anomali (kebocoran modal, overburn, OOS kritis) terdeteksi presisi dalam waktu < 5 detik. Prototipe siap di-demo-kan ke manajemen! |
 
 ---
 
-## 📈 Post-Prototype Roadmap (Fase Masa Depan)
+## Post-Prototype Roadmap (Fase Masa Depan)
 
 Jika dalam demo 90 menit tersebut 17 Account Manager dan Manajemen terkesan dan memberikan "Lampu Hijau" / *Budget*, berikut adalah peta jalan ekspansi (Implementation Plan) ke depannya.
 

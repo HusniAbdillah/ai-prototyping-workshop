@@ -498,7 +498,7 @@
     {
       "id": "CHK-ESC-001",
       "title": "WhatsApp Deep-Link URI Encoding and Action Payload Formatting",
-      "description": "Tombol eskalasi 1-klik menghasilkan Universal Link WhatsApp (wa.me) yang memuat ringkasan insiden (Channel, SKU, Harga Terjual, COGS, Nilai Kerugian, dan Rekomendasi Aksi). Analisis mendalam: Semua parameter teks harus di-encode dengan encodeURIComponent() agar karakter emoji (🚨, ⚠️), line break (%0A), dan simbol khusus tidak merusak URL browser serta langsung terbaca sempurna di aplikasi WhatsApp penerima.",
+      "description": "Tombol eskalasi 1-klik menghasilkan Universal Link WhatsApp (wa.me) yang memuat ringkasan insiden (Channel, SKU, Harga Terjual, COGS, Nilai Kerugian, dan Rekomendasi Aksi). Analisis mendalam: Semua parameter teks harus di-encode dengan encodeURIComponent() agar line break (%0A) dan simbol khusus tidak merusak URL browser serta langsung terbaca sempurna di aplikasi WhatsApp penerima.",
       "nama_test": "should generate properly URI-encoded WhatsApp escalation link with required SOP parameters",
       "testName": "should generate properly URI-encoded WhatsApp escalation link with required SOP parameters",
       "test_file": "tests/escalation/whatsapp-url.test.ts",
@@ -602,7 +602,7 @@
     {
       "id": "CHK-NOTIF-002",
       "title": "Dynamic Browser Tab Title & Favicon Badge for Background Multitasking",
-      "description": "Account Manager sering bekerja secara multitasking dengan banyak tab browser terbuka sembari mendownload report dari marketplace. Ketika tab SIRCLO Insight berada di latar belakang (background) dan parsing atau update menemukan anomali, sistem harus memperbarui document.title secara dinamis menjadi '(3) 🚨 SIRCLO Insight - Margin Bleed Terdeteksi!' dan mem-flash title berkala. Analisis mendalam: Begitu pengguna mengklik kembali ke tab (event window.onfocus), format judul tab kembali normal ke 'SIRCLO Insight - Anomaly Detection'.",
+      "description": "Account Manager sering bekerja secara multitasking dengan banyak tab browser terbuka sembari mendownload report dari marketplace. Ketika tab SIRCLO Insight berada di latar belakang (background) dan parsing atau update menemukan anomali, sistem harus memperbarui document.title secara dinamis menjadi '(3) [CRITICAL] SIRCLO Insight - Margin Bleed Terdeteksi!' dan mem-flash title berkala. Analisis mendalam: Begitu pengguna mengklik kembali ke tab (event window.onfocus), format judul tab kembali normal ke 'SIRCLO Insight - Anomaly Detection'.",
       "nama_test": "should update document title with alert prefix and badge count during background multitasking",
       "testName": "should update document title with alert prefix and badge count during background multitasking",
       "test_file": "tests/notifications/web-alert.test.ts",
@@ -618,7 +618,7 @@
         "isTabFocused": false
       },
       "expected_outcome": {
-        "documentTitle": "(3) 🚨 SIRCLO Insight - Margin Bleed Terdeteksi!",
+        "documentTitle": "(3) [CRITICAL] SIRCLO Insight - Margin Bleed Terdeteksi!",
         "resetOnFocus": true
       }
     },

@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect } from "react";
-import { LayoutDashboard, ListTodo, Settings, Activity, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, ListTodo, Settings, Activity, Sun, Moon, Check, AlertTriangle } from "lucide-react";
 import { Dropzone } from "@/components/dropzone";
 import { EmergencyBanner } from "@/components/emergency-banner";
 import { NotificationBell } from "@/components/notification-bell";
@@ -118,8 +118,11 @@ export default function App() {
       ];
       const fetchedFiles: File[] = [];
       for (const name of filesToFetch) {
-        const res = await fetch(`/data/${name}`);
-        if (!res.ok) continue;
+        const res = await fetch(`${import.meta.env.BASE_URL}data/${name}`);
+        if (!res.ok) {
+          console.warn(`Gagal memuat file demo ${name}: status ${res.status}`);
+          continue;
+        }
         const text = await res.text();
         fetchedFiles.push(new File([text], name, { type: "text/csv" }));
       }
@@ -273,8 +276,18 @@ export default function App() {
                 <div className="mt-6 pt-6 border-t border-gray-200 dark:border-white/10 text-sm space-y-2">
                   <h3 className="font-semibold text-gray-900 dark:text-white">File Terdeteksi:</h3>
                   <ul className="text-gray-500 dark:text-gray-400 space-y-1">
-                    {recognizedRoles.map(role => <li key={role}>✅ {role}</li>)}
-                    {skippedFiles.map(skipped => <li key={skipped} className="text-yellow-600">⚠️ {skipped} (Dilewati, format tak dikenal)</li>)}
+                    {recognizedRoles.map(role => (
+                      <li key={role} className="flex items-center gap-1.5">
+                        <Check className="h-4 w-4 text-emerald-500 shrink-0" />
+                        <span>{role}</span>
+                      </li>
+                    ))}
+                    {skippedFiles.map(skipped => (
+                      <li key={skipped} className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                        <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+                        <span>{skipped} (Dilewati, format tak dikenal)</span>
+                      </li>
+                    ))}
                   </ul>
                 </div>
               )}

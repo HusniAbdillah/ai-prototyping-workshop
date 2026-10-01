@@ -33,7 +33,7 @@ function issueLabel(anomaly: AnomalyResult): string {
 }
 
 function statusLabel(anomaly: AnomalyResult): string {
-  if (!anomaly.isEscalated) return "⏳ PENDING ACTION";
+  if (!anomaly.isEscalated) return "PENDING ACTION";
   const target = anomaly.escalatedTo === "WAREHOUSE" ? "Warehouse" : "Pricing";
   const time = anomaly.escalatedAt
     ? new Date(anomaly.escalatedAt).toLocaleTimeString("id-ID", {
@@ -41,7 +41,7 @@ function statusLabel(anomaly: AnomalyResult): string {
         minute: "2-digit",
       })
     : "";
-  return `✅ ESCALATED via WA ke PIC ${target}${time ? ` at ${time}` : ""}`;
+  return `ESCALATED via WA ke PIC ${target}${time ? ` at ${time}` : ""}`;
 }
 
 export function buildShiftHandoverReport(
@@ -69,14 +69,14 @@ export function buildShiftHandoverReport(
 
   const lines: string[] = [];
   lines.push("==================================================");
-  lines.push("📋 SIRCLO INSIGHT - SHIFT HANDOVER & CLAIM REPORT");
+  lines.push("SIRCLO INSIGHT - SHIFT HANDOVER & CLAIM REPORT");
   lines.push(`Tanggal: ${dateLabel} WIB`);
   lines.push(`Account Manager on Duty: ${amName}`);
   lines.push("==================================================");
   lines.push("");
-  lines.push(`🚨 TOTAL CRITICAL ISSUES: ${criticalCount}`);
-  lines.push(`⚠️ TOTAL WARNING ISSUES: ${warningCount}`);
-  lines.push(`💰 TOTAL KERUGIAN BERJALAN: ${formatRupiah(totalLoss)}`);
+  lines.push(`TOTAL CRITICAL ISSUES: ${criticalCount}`);
+  lines.push(`TOTAL WARNING ISSUES: ${warningCount}`);
+  lines.push(`TOTAL KERUGIAN BERJALAN: ${formatRupiah(totalLoss)}`);
   lines.push("");
   lines.push("DAFTAR ANOMALI & STATUS TINDAKAN:");
 

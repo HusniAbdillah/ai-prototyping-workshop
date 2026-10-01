@@ -202,7 +202,7 @@ export function evaluateMarginAndBudget(
 
     // Buat draft pesan WhatsApp SOP
     const waText = encodeURIComponent(
-      `🚨 CRITICAL [SIRCLO Insight]\n\n` +
+      `[CRITICAL] SIRCLO Insight\n\n` +
       `Terjadi Bocor Margin (Under COGS)!\n` +
       `Channel: ${sampleSale.marketplace}\n` +
       `SKU: ${sku}\n\n` +
@@ -210,8 +210,8 @@ export function evaluateMarginAndBudget(
       `Est. Admin Fee (${(feeRate * 100).toFixed(1)}%): Rp${Math.round(estFee).toLocaleString('id-ID')}\n` +
       `Net Payout Toko: Rp${Math.round(netPayout).toLocaleString('id-ID')}\n` +
       `Modal (COGS): Rp${master.cogs.toLocaleString('id-ID')}\n` +
-      `❌ Rugi per Unit: Rp${Math.round(lossPerUnit).toLocaleString('id-ID')}\n` +
-      `💥 Total Akumulasi Rugi: Rp${Math.round(cumulativeBurn).toLocaleString('id-ID')}\n\n` +
+      `Rugi per Unit: Rp${Math.round(lossPerUnit).toLocaleString('id-ID')}\n` +
+      `Total Akumulasi Rugi: Rp${Math.round(cumulativeBurn).toLocaleString('id-ID')}\n\n` +
       `*Action Required:* Mohon cabut voucher toko atau hentikan promo flash-sale SKU ini SEKARANG!`
     );
 
@@ -290,7 +290,7 @@ export function evaluateRunway(
     targetPIC = routingConfig.waPricing; // Kirim ke Pricing/Ads untuk rem laju
     recommendedAction = 'PAUSE_ADS_PRICE_BUMP';
     waText = encodeURIComponent(
-      `🚨 CRITICAL EMERGENCY [SIRCLO Insight]\n\n` +
+      `[CRITICAL EMERGENCY] SIRCLO Insight\n\n` +
       `Risiko OOS TOTAL (Buffer Gudang KOSONG)!\n` +
       `SKU: ${master.sku}\n` +
       `Runway: Sisa ${runwayHours.toFixed(1)} Jam!\n` +
@@ -302,7 +302,7 @@ export function evaluateRunway(
     );
   } else {
     waText = encodeURIComponent(
-      `⚠️ WARNING [SIRCLO Insight]\n\n` +
+      `[WARNING] SIRCLO Insight\n\n` +
       `Risiko Out of Stock (OOS)!\n` +
       `SKU: ${master.sku}\n` +
       `Runway: Sisa ${runwayHours.toFixed(1)} Jam lagi.\n` +

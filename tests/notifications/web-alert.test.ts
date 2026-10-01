@@ -11,7 +11,7 @@ describe("In-App Web Alerts & Notifications", () => {
 
   it("CHK-NOTIF-002: memperbarui judul tab dengan prefix alert & badge count", () => {
     expect(computeTabTitle(3)).toBe(
-      "(3) 🚨 SIRCLO Insight - Margin Bleed Terdeteksi!",
+      "(3) [CRITICAL] SIRCLO Insight - Margin Bleed Terdeteksi!",
     );
     expect(computeTabTitle(0)).toBe(BASE_TITLE);
     expect(computeFocusedTitle(true)).toBe(BASE_TITLE);

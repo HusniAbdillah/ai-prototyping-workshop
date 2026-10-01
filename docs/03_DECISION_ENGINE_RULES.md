@@ -128,10 +128,10 @@ Kondisi ekstrem di mana:
 - `Stock Runway <= 6 Jam`
 - `Global Buffer Gudang == 0` (atau pengajuan Purchase Order / PO ke supplier ditolak / *Lead Time* pengiriman pabrik > 3 hari).
 
-### 🚨 Dampak Fatal Reputasi Toko:
+### Dampak Fatal Reputasi Toko:
 Jika pesanan tetap mengalir saat stok fisik habis, toko akan membatalkan pesanan secara sepihak. Marketplace akan menjatuhkan **Poin Penalti Pembatalan (Non-Fulfillment Rate > 2%)** yang menyebabkan penalti pencabutan badge Shopee Mall / Star Seller dan pemblokiran fitur Flash Sale.
 
-### 🛡️ Aksi Mitigasi Otomatis (Actionable Protocol):
+### Aksi Mitigasi Otomatis (Actionable Protocol):
 Engine merekomendasikan dua tindakan darurat seketika pada teks eskalasi:
 1. **Pengereman Laju Order (Price Bump):** Instruksikan admin toko untuk menaikkan harga etalase sebesar 10% - 20% untuk memperlambat *velocity* tanpa mematikan listing.
 2. **Penghentian Belanja Iklan (Pause Ads):** Instruksikan tim ads/live streaming untuk mematikan kampanye berbayar untuk SKU terkait agar stok tersisa dapat dialokasikan hanya untuk pembeli organik.

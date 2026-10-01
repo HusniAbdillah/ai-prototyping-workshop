@@ -1,6 +1,6 @@
 /**
  * WhatsApp 1-Click Escalation builder (docs/04 §1, docs/06 §3).
- * Semua payload di-encode dengan encodeURIComponent agar emoji, line break,
+ * Semua payload di-encode dengan encodeURIComponent agar line break
  * dan simbol khusus aman di dalam URL universal link (wa.me).
  */
 
@@ -30,7 +30,7 @@ export interface MarginBleedPayload {
 export function buildMarginBleedWhatsAppText(p: MarginBleedPayload): string {
   const feePct = (p.feeRate * 100).toFixed(1);
   return (
-    `🚨 CRITICAL [SIRCLO Insight]\n\n` +
+    `[CRITICAL] SIRCLO Insight\n\n` +
     `Terjadi Bocor Margin (Under COGS)!\n` +
     `Channel: ${p.marketplace}\n` +
     `SKU: ${p.sku}\n\n` +
@@ -38,8 +38,8 @@ export function buildMarginBleedWhatsAppText(p: MarginBleedPayload): string {
     `Est. Admin Fee (${feePct}%): ${rp(p.estFee)}\n` +
     `Net Payout Toko: ${rp(p.netPayout)}\n` +
     `Modal (COGS): ${rp(p.cogs)}\n` +
-    `❌ Rugi per Unit: ${rp(p.lossPerUnit)}\n` +
-    `💥 Total Akumulasi Rugi: ${rp(p.cumulativeBurn)}\n\n` +
+    `Rugi per Unit: ${rp(p.lossPerUnit)}\n` +
+    `Total Akumulasi Rugi: ${rp(p.cumulativeBurn)}\n\n` +
     `*Action Required:* Mohon cabut voucher toko atau hentikan promo flash-sale SKU ini SEKARANG!`
   );
 }
@@ -69,7 +69,7 @@ export interface OosPayload {
 
 export function buildRebalanceOosWhatsAppText(p: OosPayload): string {
   return (
-    `⚠️ WARNING [SIRCLO Insight]\n\n` +
+    `[WARNING] SIRCLO Insight\n\n` +
     `Risiko Out of Stock (OOS)!\n` +
     `Channel: ${p.marketplace}\n` +
     `SKU: ${p.sku}\n\n` +
@@ -82,7 +82,7 @@ export function buildRebalanceOosWhatsAppText(p: OosPayload): string {
 
 export function buildEmergencyOosWhatsAppText(p: OosPayload): string {
   return (
-    `🚨 CRITICAL EMERGENCY [SIRCLO Insight]\n\n` +
+    `[CRITICAL EMERGENCY] SIRCLO Insight\n\n` +
     `Risiko OOS TOTAL (Buffer Gudang KOSONG)!\n` +
     `Channel: ${p.marketplace}\n` +
     `SKU: ${p.sku}\n\n` +

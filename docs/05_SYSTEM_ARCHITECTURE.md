@@ -39,7 +39,7 @@ sequenceDiagram
     UI-->>AM: Render High-Contrast Triage List (Noise Filtered)
     AM->>UI: Klik [Escalate to WhatsApp]
     UI->>WA: Buka Deep-link wa.me dengan draft pesan SOP terformat
-    UI->>UI: Update status SKU -> [✅ ESCALATED]
+    UI->>UI: Update status SKU -> [ESCALATED]
     AM->>UI: Klik [Copy Shift Handover] untuk materi Claim Report MBR
 ```
 

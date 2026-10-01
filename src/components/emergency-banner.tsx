@@ -36,10 +36,11 @@ export function EmergencyBanner({
     <>
       {toastVisible && (
         <div className="fixed right-4 top-4 z-50 max-w-sm rounded-lg bg-red-600/95 px-4 py-3 text-white shadow-lg animate-pulse">
-          <p className="text-sm font-semibold">
-            🚨 {computeCriticalToastTitle(criticalCount)}
+          <p className="text-sm font-semibold flex items-center gap-1.5">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span>{computeCriticalToastTitle(criticalCount)}</span>
           </p>
-          <p className="text-xs opacity-90">
+          <p className="text-xs opacity-90 mt-0.5">
             Total kerugian berjalan: {formatRupiah(totalRunningLoss)}
           </p>
         </div>
@@ -48,9 +49,9 @@ export function EmergencyBanner({
       {!dismissed && (
         <div className="flex items-center justify-between gap-3 rounded-lg bg-red-600/95 px-4 py-3 text-white animate-pulse">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5" />
+            <AlertTriangle className="h-5 w-5 shrink-0" />
             <p className="text-sm font-semibold">
-              🚨 {criticalCount} anomali CRITICAL terdeteksi — kerugian berjalan{" "}
+              {criticalCount} anomali CRITICAL terdeteksi — kerugian berjalan{" "}
               {formatRupiah(totalRunningLoss)}
             </p>
           </div>

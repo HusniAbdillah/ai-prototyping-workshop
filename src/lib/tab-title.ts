@@ -8,7 +8,7 @@ const BASE_TITLE = "SIRCLO Insight — Anomaly Detection";
 /** Hitung judul tab berdasarkan jumlah anomali kritis aktif. */
 export function computeTabTitle(criticalCount: number): string {
   if (criticalCount <= 0) return BASE_TITLE;
-  return `(${criticalCount}) 🚨 SIRCLO Insight - Margin Bleed Terdeteksi!`;
+  return `(${criticalCount}) [CRITICAL] SIRCLO Insight - Margin Bleed Terdeteksi!`;
 }
 
 /**

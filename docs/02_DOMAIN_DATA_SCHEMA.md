@@ -17,7 +17,7 @@ Jangan pernah menggunakan harga display marketplace sebagai penentu untung/rugi,
 - **`Promo_Budget_Cap`**: Batas alokasi kerugian yang **disengaja/diizinkan** untuk keperluan marketing/bakar uang (*Intentional Burn*). Default = 0 jika tidak ada promo yang disetujui.
 - **`Marketplace_Fee_Rate`**: (BARU) Estimasi total potongan biaya administrasi platform, biaya layanan, gratis ongkir xtra, dan payment gateway fee (misal Shopee Mall / Star+ berkisar **8.5%** dari Deal Price).
 
-#### 🧮 Formula True Net Margin:
+#### Formula True Net Margin:
 1. **Net Realized Payout (Uang yang Riil Masuk ke Rekening Perusahaan):**
    $$\text{Estimated Platform Fee} = \text{Deal Price} \times \text{Marketplace Fee Rate}$$
    $$\text{Net Realized Payout} = \text{Deal Price} + \text{Platform Subsidy} - \text{Seller Voucher} - \text{Estimated Platform Fee}$$
@@ -25,7 +25,7 @@ Jangan pernah menggunakan harga display marketplace sebagai penentu untung/rugi,
    $$\text{True Net Margin} = \text{Net Realized Payout} - \text{COGS}$$
    *Catatan: Jika `True Net Margin < 0`, transaksi mengalami kerugian operasional dan masuk ke perhitungan Burn Budget.*
 
-#### 📉 Formula Promo Burn Tracking:
+#### Formula Promo Burn Tracking:
 $$\text{Cumulative Burn} = \sum (\left| \text{True Net Margin} \right| \times \text{Quantity Sold})$$
 - Jika `Cumulative Burn <= 70%` dari `Promo_Budget_Cap` $\rightarrow$ **BUDGET SAFE** (Intentional Marketing Burn).
 - Jika `70% < Cumulative Burn <= 90%` dari `Promo_Budget_Cap` $\rightarrow$ **WATCHLIST (WARNING)**.
@@ -41,7 +41,7 @@ $$\text{Cumulative Burn} = \sum (\left| \text{True Net Margin} \right| \times \t
 - **`Stock_Runway`**: Waktu yang tersisa sampai stok etalase marketplace habis total (*Out of Stock*).
   $$\text{Stock Runway} = \frac{\text{Current Marketplace Stock}}{\text{Sales Velocity}}$$
 
-#### ⏱️ Sensitivity Presets (Mode Operasional):
+#### Sensitivity Presets (Mode Operasional):
 | Parameter | Normal Ops (Hari Biasa) | Mega Flash Sale (11.11 / Payday) |
 | :--- | :--- | :--- |
 | **Time Window** | 3 Jam terakhir | 1 Jam terakhir |
